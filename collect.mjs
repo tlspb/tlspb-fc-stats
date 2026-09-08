@@ -66,13 +66,18 @@ try {
     await page.locator('.match-main_team.__away').waitFor();
     const raw = await page.evaluate(()=>({
       url:location.href,
-      teams:[...document.querySelectorAll('.match-main_team')].map(a=>({href:a.getAttribute('href'),name:a.querySelector('.match-team_name')?.innerText.trim() || ''})),
+      teams:[...document.querySelectorAll('.match-main_team')].map(a=>({href:a.getAttribute('href'),name:a.querySelector('.match-team_name')?.textContent.trim() || ''})),
       scores:[...document.querySelectorAll('.match-main_score_cell')].map(e=>e.innerText.trim()),
       competition:document.querySelector('.match-general_info .mean.interactive')?.innerText.trim() || '',
       date:[...document.querySelectorAll('.match-general_info .mean')].find(e=>/20\d{2}/.test(e.innerText))?.innerText.trim() || '',
       round:[...document.querySelectorAll('.match-general_info .meta')].find(e=>/\d+\s+тур/.test(e.innerText))?.innerText.trim() || '',
       venueTime:[...document.querySelectorAll('.match-general_info .meta')].find(e=>!/^\d+\s+тур$/.test(e.innerText.trim()))?.innerText.trim() || '',
     }));
+    requireValue(raw.teams.length===2,'Incomplete match teams');
+    raw.teams.forEach((team,i)=>{
+      requireValue(team.name.toLocaleLowerCase('ru-RU')===row.names[i].toLocaleLowerCase('ru-RU'),'Calendar and match teams disagree');
+      team.name=row.names[i];
+    });
     const match = parseMatch(raw,status);
     requireValue(match.date === row.date,'Calendar and match card dates disagree');
     requireValue(match.home.name === row.names[0] && match.away.name === row.names[1],'Calendar and match teams disagree');
