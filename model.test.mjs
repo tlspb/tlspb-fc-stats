@@ -12,12 +12,14 @@ test('reject incomplete, changed and inconsistent standings',()=>{
 });
 test('full Russian dates and impossible dates',()=>{
   assert.equal(russianDate('13 сентября 2026, (вс)'),'2026-09-13');
+  assert.equal(russianDate('06 СЕНТЯБРЯ 2026'),'2026-09-06');
   assert.equal(russianDate('29 февраля 2028'),'2028-02-29');
   for(const date of ['31 февраля 2026','13 сентября','Дата не назначена']) assert.throws(()=>russianDate(date));
 });
 test('result, clean sheet and draw remain valid',()=>{
   const result = parseMatch(rawMatch,'finished');
   assert.deepEqual(result.score,[6,3]);assert.equal(result.venue,'РЖД. Поле 1');assert.equal(result.kickoff,'19:25');
+  assert.equal(parseMatch({...rawMatch,competition:'ВЫСШИЙ',date:'06 СЕНТЯБРЯ 2026'},'finished').date,'2026-09-06');
   assert.deepEqual(parseMatch({...rawMatch,scores:['0','0']},'finished').score,[0,0]);
 });
 test('reject wrong team, season, competition, URL and partial score',()=>{

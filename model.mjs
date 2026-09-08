@@ -20,6 +20,7 @@ export function integer(value, label, min = 0, max = 10000) {
   return number;
 }
 export function russianDate(text) {
+  text = text.toLocaleLowerCase('ru-RU');
   const parts = text.match(/\b(\d{1,2})\s+([а-я]+)\s+(20\d{2})\b/u);
   requireValue(parts, `Missing full date: ${text}`);
   const [,day,month,year] = parts;
@@ -60,7 +61,7 @@ export function parseMatch(raw, kind) {
   });
   const ours = teams.filter(t=>t.clubId === config.clubId && t.teamId === config.teamId);
   requireValue(ours.length === 1 && ours[0].name === config.teamName,'Wrong team in match');
-  requireValue(raw.competition === 'Высший','Wrong match competition');
+  requireValue(raw.competition.toLocaleLowerCase('ru-RU') === 'высший','Wrong match competition');
   const date = russianDate(raw.date);
   requireValue(Number(date.slice(0,4)) === config.season,'Wrong match season');
   const tour = raw.round.match(/^(\d+)\s+тур$/);
