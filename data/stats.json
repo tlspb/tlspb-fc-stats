@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-09-08T17:40:00.969Z",
+  "clubId": "69eb8fbcb2c23fc612a69398",
+  "teamId": "69eb8fbcb2c23fc612a6939a",
+  "tournamentId": "69c44c9c58b34123d1da53e6",
+  "teamName": "Транслогистика",
+  "season": 2026,
+  "tournamentName": "Юго-Восточная лига · Высший дивизион · 8×8",
+  "source": {
+    "tournament": "https://olesports.ru/tournament/69c44c9c58b34123d1da53e6?section=stats",
+    "club": "https://olesports.ru/club/69eb8fbcb2c23fc612a69398?team=69eb8fbcb2c23fc612a6939a"
+  },
+  "table": {
+    "position": 3,
+    "teamCount": 14,
+    "played": 19,
+    "won": 12,
+    "drawn": 3,
+    "lost": 4,
+    "goalsFor": 70,
+    "goalsAgainst": 42,
+    "points": 39
+  },
+  "lastMatch": {
+    "url": "https://olesports.ru/match/6a6c80ae29f5825765821f2b",
+    "status": "finished",
+    "date": "2026-09-06",
+    "kickoff": "19:25",
+    "venue": "РЖД. Поле 1",
+    "round": 19,
+    "home": {
+      "name": "Транслогистика",
+      "clubId": "69eb8fbcb2c23fc612a69398",
+      "teamId": "69eb8fbcb2c23fc612a6939a"
+    },
+    "away": {
+      "name": "Рабона",
+      "clubId": "62ff52404e0d681d80aa821b",
+      "teamId": "62ff52404e0d681d80aa821d"
+    },
+    "score": [
+      6,
+      3
+    ]
+  },
+  "nextMatch": {
+    "url": "https://olesports.ru/match/6a6c80ae29f5825765821f09",
+    "status": "scheduled",
+    "date": "2026-09-13",
+    "kickoff": "19:25",
+    "venue": "РЖД. Поле 1",
+    "round": 20,
+    "home": {
+      "name": "СБГ",
+      "clubId": "62fe507734134c11a93c69cf",
+      "teamId": "62fe507734134c11a93c69d1"
+    },
+    "away": {
+      "name": "Транслогистика",
+      "clubId": "69eb8fbcb2c23fc612a69398",
+      "teamId": "69eb8fbcb2c23fc612a6939a"
+    },
+    "score": null
+  },
+  "undatedFixtures": 6
+}
