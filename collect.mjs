@@ -61,6 +61,7 @@ try {
     if(!row) return null;
     const url = matchUrl(row.href);
     await page.goto(url,{waitUntil:'domcontentloaded'});
+    await page.getByRole('button',{name:'Информация',exact:true}).click();
     await page.locator('.match-general_info .mean').first().waitFor();
     await page.locator('.match-main_team.__away').waitFor();
     const raw = await page.evaluate(()=>({
