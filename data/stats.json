@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-09-21T06:35:18.097Z",
+  "checkedAt": "2026-09-27T03:35:39.229Z",
   "clubId": "69eb8fbcb2c23fc612a69398",
   "teamId": "69eb8fbcb2c23fc612a6939a",
   "tournamentId": "69c44c9c58b34123d1da53e6",
@@ -12,15 +12,15 @@
     "club": "https://olesports.ru/club/69eb8fbcb2c23fc612a69398?team=69eb8fbcb2c23fc612a6939a"
   },
   "table": {
-    "position": 5,
+    "position": 3,
     "teamCount": 14,
-    "played": 20,
-    "won": 12,
+    "played": 21,
+    "won": 13,
     "drawn": 3,
     "lost": 5,
-    "goalsFor": 71,
+    "goalsFor": 76,
     "goalsAgainst": 44,
-    "points": 39
+    "points": 42
   },
   "lastMatch": {
     "url": "https://olesports.ru/match/6a6c80ae29f5825765821f09",
@@ -44,6 +44,48 @@
       1
     ]
   },
-  "nextMatch": null,
-  "undatedFixtures": 6
+  "nextMatch": {
+    "url": "https://olesports.ru/match/6a6c80ae29f5825765821ee7",
+    "status": "scheduled",
+    "date": "2026-09-27",
+    "kickoff": "19:25",
+    "venue": "РЖД. Поле 1",
+    "round": 22,
+    "home": {
+      "name": "Стилес",
+      "clubId": "655381274e7c49ac7d288377",
+      "teamId": "655381274e7c49ac7d288379"
+    },
+    "away": {
+      "name": "Транслогистика",
+      "clubId": "69eb8fbcb2c23fc612a69398",
+      "teamId": "69eb8fbcb2c23fc612a6939a"
+    },
+    "score": null
+  },
+  "undatedResults": [
+    {
+      "url": "https://olesports.ru/match/6a6c80ae29f5825765821ee3",
+      "status": "finished",
+      "date": null,
+      "kickoff": null,
+      "venue": "",
+      "round": 21,
+      "home": {
+        "name": "Транслогистика",
+        "clubId": "69eb8fbcb2c23fc612a69398",
+        "teamId": "69eb8fbcb2c23fc612a6939a"
+      },
+      "away": {
+        "name": "Ангелболл",
+        "clubId": "69da552bed166a068c476dea",
+        "teamId": "69da552bed166a068c476dec"
+      },
+      "score": [
+        5,
+        0
+      ]
+    }
+  ],
+  "undatedFixtures": 4
 }
