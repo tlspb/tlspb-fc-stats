@@ -50,7 +50,35 @@ export function matchUrl(value) {
   requireValue(url.origin === 'https://olesports.ru' && /^\/match\/[a-f\d]{24}$/.test(url.pathname), 'Invalid match URL');
   return url.origin + url.pathname;
 }
-export function parseMatch(raw, kind) {
+// OLE can include completed results in its table without assigning a match date.
+// Accept that explicit state only in Results, and reconcile every score with the table.
+export function parseResultRows(rows, table) {
+  requireValue(rows.length === table.played, `Result count (${rows.length}) disagrees with standings (${table.played})`);
+  requireValue(new Set(rows.map(r=>matchUrl(r.href))).size === rows.length, 'Duplicate results');
+  const totals = {played:0,won:0,drawn:0,lost:0,goalsFor:0,goalsAgainst:0};
+  const dated = [], undated = [];
+  for (const row of rows) {
+    requireValue(row.names.length === 2 && row.names.filter(n=>n===config.teamName).length === 1, 'Unexpected result teams');
+    requireValue(row.scores.length === 2, 'Incomplete result score');
+    const scores = row.scores.map(s=>integer(s,'result score',0,100));
+    const ours = row.names.indexOf(config.teamName), gf = scores[ours], ga = scores[1-ours];
+    totals.played++; totals.goalsFor+=gf; totals.goalsAgainst+=ga;
+    totals[gf>ga?'won':gf<ga?'lost':'drawn']++;
+    if (row.dateLabel) {
+      requireValue(!row.dateUnassigned, 'Ambiguous result date');
+      const date = russianDate(row.dateLabel);
+      requireValue(Number(date.slice(0,4)) === config.season, 'Wrong result season');
+      dated.push({...row,date});
+    } else {
+      requireValue(row.dateUnassigned === true, 'Missing result date without explicit source label');
+      undated.push({...row,date:null});
+    }
+  }
+  for (const field of Object.keys(totals)) requireValue(totals[field] === table[field], `Results and standings disagree: ${field}`);
+  dated.sort((a,b)=>b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
+  return {dated,undated};
+}
+export function parseMatch(raw, kind, {allowUndated = false} = {}) {
   requireValue(['finished','scheduled'].includes(kind),'Unknown match kind');
   requireValue(raw.teams.length === 2 && raw.scores.length === 2, 'Incomplete match');
   const teams = raw.teams.map(t=>{
@@ -62,13 +90,15 @@ export function parseMatch(raw, kind) {
   const ours = teams.filter(t=>t.clubId === config.clubId && t.teamId === config.teamId);
   requireValue(ours.length === 1 && ours[0].name === config.teamName,'Wrong team in match');
   requireValue(raw.competition.toLocaleLowerCase('ru-RU') === 'высший','Wrong match competition');
-  const date = russianDate(raw.date);
-  requireValue(Number(date.slice(0,4)) === config.season,'Wrong match season');
+  const dateUnknown = /^invalid date$/i.test(raw.date.trim());
+  requireValue(!dateUnknown || (kind === 'finished' && allowUndated), 'Undated match not confirmed in results');
+  const date = dateUnknown ? null : russianDate(raw.date);
+  if (date) requireValue(Number(date.slice(0,4)) === config.season,'Wrong match season');
   const tour = raw.round.match(/^(\d+)\s+тур$/);
   requireValue(tour,'Missing match round');
   const time = raw.venueTime.match(/\b([01]\d|2[0-3]):([0-5]\d)\b/);
   const kickoff = time ? time[0] : null;
-  const venue = raw.venueTime.replace(/\s*\b([01]\d|2[0-3]):([0-5]\d)\b\s*/,' ').trim();
+  const venue = raw.venueTime.replace(/\s*\b([01]\d|2[0-3]):([0-5]\d)\b\s*/,' ').replace('--:--','').trim();
   requireValue(venue.length < 160,'Invalid venue');
   const score = kind === 'finished' ? raw.scores.map((s,i)=>integer(s,`score ${i}`,0,100)) : null;
   if (kind === 'scheduled') requireValue(raw.scores.every(s=>s === '-'),'Scheduled match already has a score');
@@ -82,6 +112,15 @@ export function validateSnapshot(data, previous = null) {
   const t = data.table;
   for (const field of ['position','teamCount','played','won','drawn','lost','goalsFor','goalsAgainst','points']) integer(t[field],field);
   requireValue(t.played === t.won + t.drawn + t.lost && t.position >= 1 && t.position <= t.teamCount,'Invalid standings');
+  const undated = data.undatedResults || [];
+  requireValue(Array.isArray(undated) && undated.length <= t.played,'Invalid undated results');
+  for (const match of undated) {
+    requireValue(match.status === 'finished' && match.date === null,'Invalid undated result');
+    matchUrl(match.url);
+    requireValue([match.home,match.away].filter(team=>team.clubId===config.clubId && team.teamId===config.teamId && team.name===config.teamName).length===1,'Wrong team in undated result');
+    requireValue(Array.isArray(match.score) && match.score.length === 2,'Missing undated result score');
+    match.score.forEach(s=>integer(s,'undated score',0,100));
+  }
   requireValue(t.played === 0 || data.lastMatch !== null,'Missing last result');
   if (data.lastMatch) requireValue(Date.parse(data.lastMatch.date + 'T00:00:00+03:00') <= checkedAt,'Result is in the future');
   if (data.nextMatch) requireValue(Date.parse(data.nextMatch.date + 'T23:59:59+03:00') >= checkedAt,'Next match is in the past');

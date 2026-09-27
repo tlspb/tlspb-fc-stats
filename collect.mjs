@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import { readFile, writeFile, mkdir, rename, appendFile } from 'node:fs/promises';
-import { config, tournamentUrl, clubUrl, requireValue, russianDate, parseTable, parseMatch, validateSnapshot, matchUrl } from './model.mjs';
+import { config, tournamentUrl, clubUrl, requireValue, russianDate, parseTable, parseResultRows, parseMatch, validateSnapshot, matchUrl } from './model.mjs';
 
 // Reads rendered public pages, exactly the information a visitor sees.
 const browser = await chromium.launch();
@@ -38,7 +38,9 @@ try {
           const dates = [...new Set(group.innerText.match(datePattern) || [])];
           if(dates.length>1) throw new Error('Ambiguous dates in calendar group');
           const dateLabel = dates[0] || null;
-          return {href:a.getAttribute('href'),names,dateLabel,time:a.querySelector('.time')?.innerText.trim() || ''};
+          const scores = [...a.querySelectorAll('.score .alterfont')].map(e=>e.innerText.trim());
+          const dateUnassigned = group.innerText.includes('Дата не назначена');
+          return {href:a.getAttribute('href'),names,scores,dateLabel,dateUnassigned,time:a.querySelector('.time')?.innerText.trim() || ''};
         }).filter(row=>row.names.includes(teamName));
     },config.teamName);
     requireValue(new Set(list.map(x=>x.href)).size === list.length,'Duplicate match rows');
@@ -50,8 +52,7 @@ try {
     return list;
   }
   const results = await listMatches('Результаты');
-  requireValue(results.length === table.played,`Result count (${results.length}) disagrees with standings (${table.played})`);
-  const datedResults = results.map(r=>({...r,date:russianDate(r.dateLabel || '')})).sort((a,b)=>b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
+  const {dated:datedResults,undated:undatedRows} = parseResultRows(results,table);
   const calendar = await listMatches('Календарь');
   const today = new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const datedFixtures = calendar.filter(r=>r.dateLabel).map(r=>({...r,date:russianDate(r.dateLabel)}))
@@ -69,7 +70,7 @@ try {
       teams:[...document.querySelectorAll('.match-main_team')].map(a=>({href:a.getAttribute('href'),name:a.querySelector('.match-team_name')?.textContent.trim() || ''})),
       scores:[...document.querySelectorAll('.match-main_score_cell')].map(e=>e.innerText.trim()),
       competition:document.querySelector('.match-general_info .mean.interactive')?.innerText.trim() || '',
-      date:[...document.querySelectorAll('.match-general_info .mean')].find(e=>/20\d{2}/.test(e.innerText))?.innerText.trim() || '',
+      date:[...document.querySelectorAll('.match-general_info .mean')].find(e=>/20\d{2}|invalid date/i.test(e.innerText))?.innerText.trim() || '',
       round:[...document.querySelectorAll('.match-general_info .meta')].find(e=>/\d+\s+тур/.test(e.innerText))?.innerText.trim() || '',
       venueTime:[...document.querySelectorAll('.match-general_info .meta')].find(e=>!/^\d+\s+тур$/.test(e.innerText.trim()))?.innerText.trim() || '',
     }));
@@ -78,18 +79,21 @@ try {
       requireValue(team.name.toLocaleLowerCase('ru-RU')===row.names[i].toLocaleLowerCase('ru-RU'),'Calendar and match teams disagree');
       team.name=row.names[i];
     });
-    const match = parseMatch(raw,status);
+    const match = parseMatch(raw,status,{allowUndated:status==='finished' && row.date===null && row.dateUnassigned===true});
     requireValue(match.date === row.date,'Calendar and match card dates disagree');
     requireValue(match.home.name === row.names[0] && match.away.name === row.names[1],'Calendar and match teams disagree');
+    if(status==='finished') requireValue(JSON.stringify(match.score)===JSON.stringify(row.scores.map(Number)),'Results list and match score disagree');
     return match;
   }
   const lastMatch = await readMatch(datedResults[0],'finished');
+  const undatedResults = [];
+  for (const row of undatedRows) undatedResults.push(await readMatch(row,'finished'));
   const nextMatch = await readMatch(datedFixtures[0],'scheduled');
   let previous = null;
   try {previous=JSON.parse(await readFile('data/stats.json','utf8'));} catch(error) {if(error.code!=='ENOENT')throw error;}
   const snapshot = validateSnapshot({
     schemaVersion:1,checkedAt:new Date().toISOString(),...config,
-    source:{tournament:tournamentUrl,club:clubUrl},table,lastMatch,nextMatch,
+    source:{tournament:tournamentUrl,club:clubUrl},table,lastMatch,nextMatch,undatedResults,
     undatedFixtures:calendar.filter(r=>!r.dateLabel).length,
   },previous);
   const json = JSON.stringify(snapshot,null,2)+'\n';
