@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-09-29T06:35:22.299Z",
+  "checkedAt": "2026-09-30T06:35:40.771Z",
   "clubId": "69eb8fbcb2c23fc612a69398",
   "teamId": "69eb8fbcb2c23fc612a6939a",
   "tournamentId": "69c44c9c58b34123d1da53e6",
@@ -44,7 +44,25 @@
       5
     ]
   },
-  "nextMatch": null,
+  "nextMatch": {
+    "url": "https://olesports.ru/match/6a6c80ae29f5825765821eff",
+    "status": "scheduled",
+    "date": "2026-10-04",
+    "kickoff": "21:35",
+    "venue": "РЖД. Поле 2",
+    "round": 23,
+    "home": {
+      "name": "Олимпик",
+      "clubId": "62ffaba85af15e2781725db4",
+      "teamId": "62ffaba85af15e2781725db6"
+    },
+    "away": {
+      "name": "Транслогистика",
+      "clubId": "69eb8fbcb2c23fc612a69398",
+      "teamId": "69eb8fbcb2c23fc612a6939a"
+    },
+    "score": null
+  },
   "undatedResults": [
     {
       "url": "https://olesports.ru/match/6a6c80ae29f5825765821ee3",
@@ -69,5 +87,5 @@
       ]
     }
   ],
-  "undatedFixtures": 4
+  "undatedFixtures": 3
 }
