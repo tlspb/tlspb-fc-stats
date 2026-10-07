@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-07T04:45:22.501Z",
+  "clubId": "62ff9c1d5af15e27817168a9",
+  "teamId": "62ff9c1d5af15e27817168ab",
+  "tournamentId": "69c44cb97ae933238d8a9943",
+  "teamName": "Атлетико-Домбай",
+  "season": 2026,
+  "tournamentName": "Суперлига · 8×8",
+  "source": {
+    "tournament": "https://olesports.ru/tournament/69c44cb97ae933238d8a9943?section=stats",
+    "club": "https://olesports.ru/club/62ff9c1d5af15e27817168a9?team=62ff9c1d5af15e27817168ab"
+  },
+  "table": {
+    "position": 13,
+    "teamCount": 14,
+    "played": 23,
+    "won": 4,
+    "drawn": 3,
+    "lost": 16,
+    "goalsFor": 52,
+    "goalsAgainst": 96,
+    "points": 15
+  },
+  "lastMatch": {
+    "url": "https://olesports.ru/match/6a6c4fc4bd151e57631339f8",
+    "status": "finished",
+    "date": "2026-10-04",
+    "kickoff": "15:20",
+    "venue": "РЖД. Поле 1",
+    "round": 23,
+    "home": {
+      "name": "Старая Школа-РД",
+      "clubId": "62fea15c9c26801f955ecfc0",
+      "teamId": "62fea15c9c26801f955ecfc2"
+    },
+    "away": {
+      "name": "Атлетико-Домбай",
+      "clubId": "62ff9c1d5af15e27817168a9",
+      "teamId": "62ff9c1d5af15e27817168ab"
+    },
+    "score": [
+      0,
+      8
+    ]
+  },
+  "lastMatches": [
+    {
+      "url": "https://olesports.ru/match/6a6c4fc4bd151e57631339f8",
+      "status": "finished",
+      "date": "2026-10-04",
+      "kickoff": "15:20",
+      "venue": "РЖД. Поле 1",
+      "round": 23,
+      "home": {
+        "name": "Старая Школа-РД",
+        "clubId": "62fea15c9c26801f955ecfc0",
+        "teamId": "62fea15c9c26801f955ecfc2"
+      },
+      "away": {
+        "name": "Атлетико-Домбай",
+        "clubId": "62ff9c1d5af15e27817168a9",
+        "teamId": "62ff9c1d5af15e27817168ab"
+      },
+      "score": [
+        0,
+        8
+      ]
+    },
+    {
+      "url": "https://olesports.ru/match/6a6c4fc4bd151e57631339e0",
+      "status": "finished",
+      "date": "2026-09-27",
+      "kickoff": "10:00",
+      "venue": "РЖД. Поле 1",
+      "round": 22,
+      "home": {
+        "name": "Атлетико-Домбай",
+        "clubId": "62ff9c1d5af15e27817168a9",
+        "teamId": "62ff9c1d5af15e27817168ab"
+      },
+      "away": {
+        "name": "БалтСтройИнвест",
+        "clubId": "6735aa5db1a709b859bf5cec",
+        "teamId": "6735aa5db1a709b859bf5cee"
+      },
+      "score": [
+        6,
+        1
+      ]
+    }
+  ],
+  "nextMatch": {
+    "url": "https://olesports.ru/match/6a6c4fc4bd151e5763133a0c",
+    "status": "scheduled",
+    "date": "2026-10-11",
+    "kickoff": "18:00",
+    "venue": "РЖД. Поле 1",
+    "round": 24,
+    "home": {
+      "name": "Атлетико-Домбай",
+      "clubId": "62ff9c1d5af15e27817168a9",
+      "teamId": "62ff9c1d5af15e27817168ab"
+    },
+    "away": {
+      "name": "Крысиная Нора",
+      "clubId": "62ff7a145af15e27816f23d9",
+      "teamId": "62ff7a145af15e27816f23db"
+    },
+    "score": null
+  },
+  "undatedResults": [],
+  "undatedFixtures": 2
+}
