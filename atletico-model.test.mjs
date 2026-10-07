@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {config, parseTable, parseResultRows, parseMatch, russianDate, validateSnapshot} from './atletico-model.mjs';
+
+const rawTable = {name:'Атлетико-Домбай',headers:['И','В','Н','П','Голы','О'],values:['23','4','3','16','52-96','15'],position:'13',teamCount:'14'};
+const table = parseTable(rawTable);
+const rawMatch = {url:'https://olesports.ru/match/6a6c4fc4bd151e57631339f8',teams:[{href:'/club/62fea15c9c26801f955ecfc0?team=62fea15c9c26801f955ecfc2',name:'Старая Школа-РД'},{href:`/club/${config.clubId}?team=${config.teamId}`,name:config.teamName}],scores:['0','8'],competition:'Суперлига',date:'4 октября 2026',round:'23 тур',venueTime:'РЖД. Поле 1 15:20'};
+
+test('Reads the verified Superliga 2026 standings',()=>{assert.deepEqual(table,{position:13,teamCount:14,played:23,won:4,drawn:3,lost:16,goalsFor:52,goalsAgainst:96,points:15});});
+test('Rejects the reserve team and mismatched totals',()=>{assert.throws(()=>parseTable({...rawTable,name:'Атлетико-Домбай-д'}));assert.throws(()=>parseTable({...rawTable,values:['23','5','3','16','52-96','15']}));});
+test('Parses the 0:8 result and validates the main team identity',()=>{const m=parseMatch(rawMatch,'finished');assert.equal(m.away.teamId,config.teamId);assert.equal(m.date,'2026-10-04');assert.equal(m.kickoff,'15:20');assert.deepEqual(m.score,[0,8]);assert.equal(m.round,23);});
+test('Rejects another competition, team or season',()=>{assert.throws(()=>parseMatch({...rawMatch,competition:'Высший'},'finished'));assert.throws(()=>parseMatch({...rawMatch,date:'4 октября 2025'},'finished'));assert.throws(()=>parseMatch({...rawMatch,teams:[rawMatch.teams[0],{...rawMatch.teams[1],href:`/club/${config.clubId}?team=000000000000000000000000`}]},'finished'));});
+test('Rejects invalid dates and scheduled games with a score',()=>{assert.throws(()=>russianDate('31 февраля 2026'));assert.throws(()=>parseMatch(rawMatch,'scheduled'));});
+test('Reconciles outcomes and scores before publishing',()=>{const rows=[{href:rawMatch.url,names:['Старая Школа-РД',config.teamName],scores:['0','8'],dateLabel:'4 октября 2026',dateUnassigned:false,time:'15:20'},{href:'https://olesports.ru/match/000000000000000000000001',names:[config.teamName,'БалтСтройИнвест'],scores:['6','1'],dateLabel:'27 сентября 2026',dateUnassigned:false,time:'10:00'}];const totals={played:2,won:2,drawn:0,lost:0,goalsFor:14,goalsAgainst:1};assert.equal(parseResultRows(rows,totals).dated[0].date,'2026-10-04');assert.throws(()=>parseResultRows(rows,{...totals,goalsFor:15}));assert.throws(()=>parseResultRows([rows[0],rows[0]],totals));});
+test('Rejects a snapshot for another league and regressing match count',()=>{const m=parseMatch(rawMatch,'finished');const snapshot={schemaVersion:1,checkedAt:new Date().toISOString(),...config,table,lastMatch:m,lastMatches:[m],nextMatch:null,undatedResults:[]};assert.equal(validateSnapshot(snapshot).table.points,15);assert.throws(()=>validateSnapshot({...snapshot,tournamentId:'wrong'}));assert.throws(()=>validateSnapshot(snapshot,{...snapshot,table:{...table,played:24}}));});
