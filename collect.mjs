@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import { openOlePage } from './navigation.mjs';
 import { readFile, writeFile, mkdir, rename, appendFile } from 'node:fs/promises';
 import { config, tournamentUrl, clubUrl, requireValue, russianDate, parseTable, parseResultRows, parseMatch, validateSnapshot, matchUrl } from './model.mjs';
 
@@ -9,9 +10,8 @@ try {
   page.setDefaultTimeout(45000);
   page.setDefaultNavigationTimeout(45000);
   await page.route('**/*', route => ['image','media','font'].includes(route.request().resourceType()) ? route.abort() : route.continue());
-  await page.goto(tournamentUrl,{waitUntil:'domcontentloaded'});
   const anchor = page.locator(`.standings.desktop a[href="/club/${config.clubId}"]`);
-  await anchor.waitFor();
+  await openOlePage(page, tournamentUrl, {ready: () => anchor.waitFor({timeout:60000})});
   const rawTable = await anchor.evaluate(a=>{
     const row = a.closest('.standings-row');
     const table = row.closest('.standings');
@@ -61,7 +61,7 @@ try {
   async function readMatch(row, status) {
     if(!row) return null;
     const url = matchUrl(row.href);
-    await page.goto(url,{waitUntil:'domcontentloaded'});
+    await openOlePage(page, url, {ready: () => page.getByRole('button',{name:'Информация',exact:true}).waitFor({timeout:60000})});
     await page.getByRole('button',{name:'Информация',exact:true}).click();
     await page.locator('.match-general_info .mean').first().waitFor();
     await page.locator('.match-main_team.__away').waitFor();
