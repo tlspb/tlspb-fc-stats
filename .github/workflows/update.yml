@@ -13,7 +13,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 16
     permissions:
       contents: write
     steps:
@@ -23,14 +23,16 @@ jobs:
           node-version: '22'
           package-manager-cache: false
       - name: Test data validation
-        run: node --test model.test.mjs atletico-model.test.mjs
+        run: node --test model.test.mjs atletico-model.test.mjs navigation.test.mjs
       - run: npm install --no-save --ignore-scripts playwright@1.63.0
       - run: npx playwright install --with-deps chromium
       - name: Read and validate Translogistika OLE pages
+        timeout-minutes: 7
         id: translogistika
         continue-on-error: true
         run: node collect.mjs
       - name: Read and validate Atletico-Dombay Superliga pages
+        timeout-minutes: 7
         id: atletico
         continue-on-error: true
         run: node collect-atletico.mjs
