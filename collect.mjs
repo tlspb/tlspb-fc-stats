@@ -1,15 +1,15 @@
 import { chromium } from 'playwright';
-import { openOlePage } from './navigation.mjs';
+import { openOlePage, prepareOlePage } from './navigation.mjs';
 import { readFile, writeFile, mkdir, rename, appendFile } from 'node:fs/promises';
 import { config, tournamentUrl, clubUrl, requireValue, russianDate, parseTable, parseResultRows, parseMatch, validateSnapshot, matchUrl } from './model.mjs';
 
 // Reads rendered public pages, exactly the information a visitor sees.
 const browser = await chromium.launch();
 try {
-  const page = await browser.newPage({viewport:{width:1440,height:1000},locale:'ru-RU',timezoneId:'Europe/Moscow'});
+  const page = await browser.newPage({viewport:{width:1440,height:1000},locale:'ru-RU',timezoneId:'Europe/Moscow',serviceWorkers:'block'});
   page.setDefaultTimeout(45000);
   page.setDefaultNavigationTimeout(45000);
-  await page.route('**/*', route => ['image','media','font'].includes(route.request().resourceType()) ? route.abort() : route.continue());
+  await prepareOlePage(page);
   const anchor = page.locator(`.standings.desktop a[href="/club/${config.clubId}"]`);
   await openOlePage(page, tournamentUrl, {ready: () => anchor.waitFor({timeout:60000})});
   const rawTable = await anchor.evaluate(a=>{

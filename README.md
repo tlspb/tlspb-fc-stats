@@ -38,4 +38,8 @@ Atletico-Dombay includes its latest two dated league results in `lastMatches`, s
 
 Source layout changes may require adjusting selectors in the relevant collection file. Keep errors visible instead of publishing partial data. To pause daily updates, disable **OLE daily statistics** in GitHub Actions. GitHub can also disable public scheduled workflows after 60 days without repository activity; re-enable the workflow in Actions if necessary.
 
+The collector skips OLE's optional remote branding stylesheet (`engine.amateum.com/files/theme.css`), which can hang and prevent the site's deferred JavaScript from starting. OLE's own layout styles, scripts and all data requests are retained. A fresh browser context blocks service workers so stale cached application files cannot override request handling. This changes only the background collector, not the visitor's OLE or TLSPB page.
+
+After a source loading timeout, the run log and summary identify failed or unfinished public dependencies, including the standings request. Query strings are omitted. If the standings service itself is unavailable, the collector still fails after three attempts and preserves the last validated JSON; it does not manufacture a new check date or suppress failure notifications.
+
 Only public football aggregates are stored here. No site source, customer data, CMS access or player profiles are included.
