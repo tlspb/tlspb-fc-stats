@@ -6,7 +6,7 @@ import { openOlePage, skipOleAsset } from './navigation.mjs';
 const url = 'https://olesports.ru/tournament/69c44cb97ae933238d8a9943?section=stats';
 const ok = { ok: () => true, status: () => 200 };
 const timeout = () => Object.assign(new Error('Timeout 45000ms exceeded'), { name: 'TimeoutError' });
-const options = { pause: async () => {}, warn: () => {} };
+const options = { pause: async () => {}, warn: () => {}, report: async () => {} };
 
 test('navigation timeout recovers and waits for football content before returning', async () => {
   let calls = 0, ready = 0;
@@ -28,9 +28,13 @@ test('a stuck source preloader retries content readiness, without returning inco
 });
 
 test('persistent unavailability stops after three attempts', async () => {
-  let calls = 0;
-  await assert.rejects(openOlePage({ goto: async () => { calls++; throw timeout(); } }, url, options), /Timeout/);
+  let calls = 0, reports = 0;
+  await assert.rejects(openOlePage({ goto: async () => { calls++; throw timeout(); } }, url,
+    { ...options, report: async (target, error) => {
+      reports++; assert.equal(target, url); assert.equal(error.name, 'TimeoutError');
+    } }), /Timeout/);
   assert.equal(calls, 3);
+  assert.equal(reports, 1);
 });
 
 test('temporary server errors retry; missing pages and certificate errors do not', async () => {

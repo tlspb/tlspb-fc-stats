@@ -56,11 +56,18 @@ function retryable(error) {
   return error.name === 'TimeoutError' || /net::ERR_(?:TIMED_OUT|CONNECTION_TIMED_OUT|CONNECTION_RESET|CONNECTION_CLOSED|EMPTY_RESPONSE|NETWORK_CHANGED|NAME_NOT_RESOLVED)\b/.test(error.message);
 }
 
+async function reportLoadingFailure(url, error) {
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    await appendFile(process.env.GITHUB_STEP_SUMMARY,
+      `\n## OLE: source could not be loaded\n\nPublic page: ${url}\n\nLast verified statistics remain unchanged.\n\n\`\`\`text\n${error.message}\n\`\`\`\n`);
+  }
+}
+
 // Wait for the actual football content, rather than unrelated deferred scripts.
 // Retry only loading failures; data validation remains outside this function.
 export async function openOlePage(page, url, {
   ready = async () => {}, attempts = 3, timeout = 45000,
-  pause = sleep, warn = console.warn,
+  pause = sleep, warn = console.warn, report = reportLoadingFailure,
 } = {}) {
   const target = new URL(url);
   if (target.origin !== 'https://olesports.ru' || !/^\/(?:tournament|match|club)\/[a-f0-9]{24}$/.test(target.pathname)) {
@@ -82,10 +89,7 @@ export async function openOlePage(page, url, {
       const isLoadingFailure = retryable(error);
       if (isLoadingFailure) error.message += loading.describe();
       if (!isLoadingFailure || attempt === attempts) {
-        if (isLoadingFailure && process.env.GITHUB_STEP_SUMMARY) {
-          await appendFile(process.env.GITHUB_STEP_SUMMARY,
-            `\n## OLE: source could not be loaded\n\nPublic page: ${url}\n\nLast verified statistics remain unchanged.\n\n\`\`\`text\n${error.message}\n\`\`\`\n`);
-        }
+        if (isLoadingFailure) await report(url, error);
         throw error;
       }
       const delay = 15000 * attempt;
